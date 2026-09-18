@@ -9,34 +9,47 @@ export default function ProtectedPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  function loadProfile() {
-    // TODO: pegar o token salvo no localStorage usando getToken.
-    // TODO: se não existir token, redirecionar para /login.
-    // TODO: ativar loading.
-    // TODO: chamar GET /users/profile usando api.get.
-    // TODO: enviar o token no header Authorization no formato Bearer TOKEN.
-    // TODO: salvar os dados do usuário no estado user.
-    // TODO: se o token for inválido, remover token e redirecionar para /login.
-    // TODO: mostrar mensagem de erro se acontecer algum problema.
-    // TODO: desativar loading no final.
-    // Dica: api.get("/users/profile", { headers: { Authorization: `Bearer ${token}` } })
+  async function loadProfile() {
+    const token = getToken();
+
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await api.get("/perfil", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUser(response.data.user);
+    } catch (err) {
+      removeToken();
+      navigate("/login", { replace: true });
+      setError(err.response?.data?.message || "Sessão expirada. Faça login novamente.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleLogout() {
-    // TODO: remover o token usando removeToken.
-    // TODO: redirecionar para /login.
+    removeToken();
+    navigate("/login", { replace: true });
   }
 
   useEffect(() => {
-    // Este efeito prepara o carregamento do perfil quando a página abre.
-    // Após completar loadProfile, a requisição acontecerá aqui.
     loadProfile();
   }, []);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-8">
       <section className="w-full max-w-lg rounded-xl bg-white p-6 shadow-md sm:p-8">
-        <h1 className="mb-4 text-center text-2xl font-bold text-gray-900">Área Protegida</h1>
+        <h1 className="mb-4 text-center text-2xl font-bold text-gray-900">Perfil</h1>
         <p role="status" className="mb-5 rounded-md bg-green-50 p-3 text-center text-green-700">Login realizado com sucesso</p>
 
         {loading && <p role="status" className="mb-4 text-gray-600">Carregando perfil...</p>}
@@ -50,7 +63,7 @@ export default function ProtectedPage() {
         </div>
 
         <button type="button" onClick={handleLogout} className="w-full rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
-          Sair
+          Logout
         </button>
       </section>
     </main>

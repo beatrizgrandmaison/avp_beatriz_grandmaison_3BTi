@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api.js";
 import { saveToken } from "../services/auth.js";
 
@@ -10,21 +10,37 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  function handleLogin(event) {
-    // TODO: impedir o comportamento padrão do formulário.
-    event.preventDefault(); // Preparação mínima: a página não recarrega durante a aula.
-    // TODO: limpar mensagem de erro anterior.
-    // TODO: validar se email e password foram preenchidos.
-    // TODO: ativar loading.
-    // TODO: chamar POST /auth/login usando api.post.
-    // TODO: enviar email e password no body.
-    // TODO: pegar o token retornado pelo backend.
-    // TODO: salvar o token usando saveToken.
-    // TODO: redirecionar para /protegida usando useNavigate.
-    // TODO: mostrar mensagem de erro se o login falhar.
-    // TODO: desativar loading no final.
-    // O backend retorna um token JWT. O frontend precisa guardá-lo para as próximas requisições.
-    // Dica: use try/catch/finally para separar sucesso, erro e loading.
+  async function handleLogin(event) {
+    event.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Informe e-mail e senha para continuar.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await api.post("/login", {
+        email,
+        password,
+      });
+
+      const token = response.data?.token;
+
+      if (!token) {
+        throw new Error("Token não recebido do servidor.");
+      }
+
+      saveToken(token);
+      navigate("/perfil", { replace: true });
+    } catch (err) {
+      const message = err.response?.data?.message || "Não foi possível fazer login.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -37,6 +53,7 @@ export default function Login() {
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">Email</label>
             <input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none" />
           </div>
+
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">Senha</label>
             <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none" />
@@ -48,10 +65,6 @@ export default function Login() {
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
-
-        <p className="mt-5 text-center text-sm text-gray-600">
-          Ainda não tem conta? <Link to="/register" className="font-medium text-blue-600 hover:underline">Criar conta</Link>
-        </p>
       </section>
     </main>
   );
