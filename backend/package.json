@@ -1,0 +1,12 @@
+{
+  "name": "template-auth-tcc-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node ../src/server.js",
+    "dev": "nodemon ../src/server.js",
+    "prisma:push": "prisma db push --schema ../prisma/schema.prisma",
+    "prisma:seed": "prisma db seed --schema ../prisma/schema.prisma"
+  }
+}

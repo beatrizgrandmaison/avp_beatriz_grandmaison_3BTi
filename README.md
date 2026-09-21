@@ -12,7 +12,7 @@ As partes principais da autenticação contêm `TODOs`. Elas não estão prontas
 
 - Node.js e Express
 - ES Modules (`import` e `export`)
-- Prisma ORM e MySQL
+- Prisma ORM e SQLite
 - bcrypt
 - jsonwebtoken (JWT)
 - dotenv
@@ -45,7 +45,7 @@ README.md
 
 ## 4. Como instalar as dependências
 
-Tenha o Node.js e um servidor MySQL instalados. No terminal, dentro da pasta do projeto, execute:
+Tenha o Node.js instalado. No terminal, dentro da pasta do projeto, execute:
 
 ```bash
 npm install
@@ -61,10 +61,10 @@ cp .env.example .env
 
 No PowerShell, se `cp` não funcionar, use `Copy-Item .env.example .env`.
 
-Depois, abra o `.env` e troque usuário, senha, host e nome do banco conforme sua instalação do MySQL:
+O projeto usa um banco SQLite local, criado automaticamente na pasta do projeto:
 
 ```env
-DATABASE_URL="mysql://usuario:senha@localhost:3306/template_auth_tcc"
+DATABASE_URL="file:./dev.db"
 JWT_SECRET="troque_essa_chave"
 JWT_EXPIRES_IN="1d"
 PORT=3000
@@ -74,10 +74,10 @@ O arquivo `.env` contém dados privados e não deve ser enviado ao Git. O `.env.
 
 ## 6. Como criar o banco com Prisma
 
-Com o MySQL funcionando e o `.env` configurado, execute:
+Com o `.env` configurado, execute:
 
 ```bash
-npx prisma migrate dev --name init
+npx prisma db push
 ```
 
 Esse comando cria as tabelas descritas em `prisma/schema.prisma` e gera o Prisma Client.
